@@ -1,77 +1,54 @@
 from rest_framework import serializers
-from . import models
+from .models import UserModel, Group, StudentProfile, TeacherProfile, Attendance, Task, TaskSubmission, TaskRating
 
 
-
-#Base Serializers
- 
-class UserSerializer(serializers.ModelSerializer):
+class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.UserModel
-        fields = ('user_full_name','user_login','user_hash_value','user_password','user_telegram_username')
+        model = UserModel
+        fields = '__all__'
 
-class TaskImageSerializers(serializers.ModelSerializer):
+
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model= models.TaskImages
-        fields = ('photo',)
-class ReplyTaskSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = models.ReplyAnswer
-        fields = ('text',)
-
-class GroupSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = models.StudentsGroups
-        fields = ('group',)
-
-class StudentImageSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = models.StudentsImage
-        fields = ('studnet_image',)
+        model = Group
+        fields = '__all__'
 
 
-#Modify Serailizers
-
-
-##Students Serializers
-class StudentSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    photo = StudentImageSerializers(many=True,read_only=True)
-    class Meta:
-        model = models.Students
-        fields = ('user','student_group','photo')
-
-
-class StudentTag(serializers.ModelSerializer):
+class StudentProfileSerializer(serializers.ModelSerializer):
+    user = UserModelSerializer()
 
     class Meta:
-        model = models.StudentTag
-        fields = ('student','ip','date','time')
-
-##Task Serializers    
-class AnswerTask(serializers.ModelSerializer):
-    reply = ReplyTaskSerializers(many=True,read_only=True)
-    class Meta:
-        model = models.AnswerTask
-        fields = ('student','task','file','date_answer','time_answer','date_answer','reply')
-
-class TaskSerializers(serializers.ModelSerializer):
-    images = TaskImageSerializers(many=True,read_only=True)
-    answers = AnswerTask(many=True,read_only=True)
-    class Meta:
-        model = models.TaskTable
-        fields = ('title','description','hash_value','max_rate','status','answers','images')
+        model = StudentProfile
+        fields = '__all__'
 
 
-# Teacher Serializers
-class TeacherControlSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.TeacherGroupControl
-        fields = ['control',]
-    
-class TeacherSerializer(serializers.ModelSerializer):
-    control = TeacherControlSerializer(read_only=True) 
+class TeacherProfileSerializer(serializers.ModelSerializer):
+    user = UserModelSerializer()
 
     class Meta:
-        model = models.TeacherModel
-        fields = ['user','control']
+        model = TeacherProfile
+        fields = '__all__'
+
+
+class AttendanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attendance
+        fields = '__all__'
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = '__all__'
+
+
+class TaskSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskSubmission
+        fields = '__all__'
+
+
+class TaskRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskRating
+        fields = '__all__'

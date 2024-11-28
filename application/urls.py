@@ -1,16 +1,41 @@
-from django.urls import path,include
-from . import views
+from django.urls import path
+from .views import (
+    UserModelView,
+    GroupView,
+    StudentProfileView,
+    TeacherProfileView,
+    TaskView,
+)
 
+# Маршруты для пользователей
+user_patterns = [
+    path('users/', UserModelView.as_view(), name='user-list'),
+    path('users/<int:pk>/', UserModelView.as_view(), name='user-detail'),
+]
 
+# Маршруты для групп
+group_patterns = [
+    path('groups/', GroupView.as_view(), name='group-list'),
+    path('groups/<int:pk>/', GroupView.as_view(), name='group-detail'),
+]
+
+# Маршруты для студентов
 student_patterns = [
-    path('students/', views.StudentView.as_view(), name='student-list'),
+    path('students/', StudentProfileView.as_view(), name='student-list'),
+    path('students/<int:pk>/', StudentProfileView.as_view(), name='student-detail'),
 ]
+
+# Маршруты для учителей
 teacher_patterns = [
-    path('teachers/',view=views.TeacherView.as_view())
+    path('teachers/', TeacherProfileView.as_view(), name='teacher-list'),
+    path('teachers/<int:pk>/', TeacherProfileView.as_view(), name='teacher-detail'),
 ]
-task_pattern = [
-    path('tasks/',view=views.TaskViews.as_view())
+
+# Маршруты для заданий
+task_patterns = [
+    path('tasks/', TaskView.as_view(), name='task-list'),
+    path('tasks/<int:pk>/', TaskView.as_view(), name='task-detail'),
 ]
-urlpatterns = [
-    # path('users/', views.UserView.as_view(), name='user-list'),
-] + student_patterns + teacher_patterns + task_pattern
+
+# Финальный список маршрутов
+urlpatterns = user_patterns + group_patterns + student_patterns + teacher_patterns + task_patterns

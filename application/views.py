@@ -1,37 +1,102 @@
-from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, mixins
 from rest_framework.response import Response
-from .  import models
-from . import serializers
+from rest_framework.views import APIView
+from .models import UserModel, Group, StudentProfile, TeacherProfile, Task
+from . import utils
+from .serializers import (
+    UserModelSerializer,
+    GroupSerializer,
+    StudentProfileSerializer,
+    TeacherProfileSerializer,
+    TaskSerializer,
+)
 
-class StudentView(generics.ListAPIView):
-    def get_queryset(self):
-        if 'id' in self.request.query_params:
-            return models.Students.objects.filter(user=self.request.query_params['id'])
-        return models.Students.objects.all()
 
-    def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer_for_queryset = serializers.StudentSerializer(queryset, many=True)
-        return Response(serializer_for_queryset.data)
-    
-class TeacherView(generics.ListAPIView):
-    def get_queryset(self):
-        if 'id' in self.request.query_params:
-            return models.Students.objects.filter(user=self.request.query_params['id'])
-        return models.Students.objects.all()
+# CRUD для пользователей
+class UserModelView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
 
     def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer_for_queryset = serializers.TeacherSerializer(queryset, many=True)
-        return Response(serializer_for_queryset.data)
-    
-class TaskViews(generics.ListAPIView):
-    def get_queryset(self):
-        if 'id' in self.request.query_params:
-            return models.TaskTable.objects.filter(id=self.request.query_params['id'])
-        return models.TaskTable.objects.all()
-    def get(self,request, *args,**kwargs):
-        queryset = self.get_queryset()
-        serializers_for_queryset = serializers.TaskSerializers(queryset,many=True)
-        return Response(serializers_for_queryset.data)
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+# CRUD для групп
+class GroupView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+# CRUD для профилей студентов
+class StudentProfileView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = StudentProfile.objects.all()
+    serializer_class = StudentProfileSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+# CRUD для профилей учителей
+class TeacherProfileView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = TeacherProfile.objects.all()
+    serializer_class = TeacherProfileSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+# CRUD для заданий
+class TaskView(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
