@@ -49,8 +49,8 @@ class TaskSubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(TaskRating)
 class TaskRatingAdmin(admin.ModelAdmin):
-    list_display = ('task', 'rating')
-    search_fields = ('task__title',)
+    list_display = ('answer', 'rating')
+    search_fields = ('answer__student',)
     list_filter = ('rating',)
 
 

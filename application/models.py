@@ -97,11 +97,11 @@ class TaskRating(models.Model):
     """
     Оценка задания
     """
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='ratings')
+    answer = models.ForeignKey(TaskSubmission, on_delete=models.CASCADE, related_name='ratings')
     rating = models.PositiveIntegerField()
 
     def __str__(self):
-        return f'{self.task} - {self.rating}'
+        return f'{self.answer} - {self.rating}'
 
 
 class AttendanceRecord(models.Model):

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-container">
+    <form action="" method="post" class="styled-form">
+        {% csrf_token %}
+        <h2>Register</h2>
+        <div class="form-group">
+            <label for="user_full_name">Full Name</label>
+            <input type="text" id="user_full_name" name="user_full_name" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+            <label for="user_login">Username</label>
+            <input type="text" id="user_login" name="user_login" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+            <label for="user_password">Password</label>
+            <input type="password" id="user_password" name="user_password" placeholder="Enter your password" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role" class="select_role-user" required>
+                <option value="None"></option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="telegram_username">Telegram Username</label>
+            <input type="text" id="telegram_username" name="telegram_username" placeholder="@username">
+        </div>
+        <button type="submit" class="btn-submit">Register</button>
+    </form>
+</div>
+{% endblock %}

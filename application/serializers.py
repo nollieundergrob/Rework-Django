@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserModel, Group, StudentProfile, TeacherProfile, Attendance, Task, TaskSubmission, TaskRating
+from .models import UserModel, Group,AttendanceRecord, StudentProfile, TeacherProfile, Attendance, Task, TaskSubmission, TaskRating
 
 
 class UserModelSerializer(serializers.ModelSerializer):
@@ -33,6 +33,11 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendance
+        fields = '__all__'
+
+class AttendanceRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendanceRecord
         fields = '__all__'
 
 
