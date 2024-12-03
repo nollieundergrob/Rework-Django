@@ -42,12 +42,15 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt', 
 ]
 
+from datetime import timedelta
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
 
+<<<<<<< HEAD
 from datetime import timedelta
 
 REST_FRAMEWORK = {
@@ -64,6 +67,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
+=======
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+>>>>>>> e6f268d1e21adf5848392f8928c09645e3a08976
 }
 
 

@@ -52,6 +52,7 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
+<<<<<<< HEAD
 class AttendanceRecord(models.Model):
     user = models.ForeignKey(
         UserModel,
@@ -67,3 +68,77 @@ class AttendanceRecord(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.timestamp}"
+=======
+
+class StudentProfile(models.Model):
+    """
+    Профиль студента
+    """
+    user = models.OneToOneField(UserModel, on_delete=models.CASCADE, related_name='student_profile')
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, related_name='students')
+
+    def __str__(self):
+        return f'{self.user.user_full_name} - {self.group}'
+
+
+class TeacherProfile(models.Model):
+    """
+    Профиль учителя
+    """
+    user = models.OneToOneField(UserModel, on_delete=models.CASCADE, related_name='teacher_profile')
+    rank = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.user.user_full_name
+
+
+class Attendance(models.Model):
+    """
+    Посещения студентов
+    """
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='attendance')
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.JSONField()  # Хранить данные user-agent
+    timestamp = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return f'{self.student} - {self.timestamp}'
+
+
+class Task(models.Model):
+    """
+    Задания
+    """
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    hash_value = models.CharField(max_length=65, unique=True)
+    status = models.BooleanField(default=True)
+    max_rate = models.PositiveIntegerField()
+
+    def __str__(self):
+        return self.title
+
+
+class TaskSubmission(models.Model):
+    """
+    Ответы на задания
+    """
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='submissions')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='submissions')
+    file = models.FileField(upload_to='media/task/files')
+    timestamp = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return f'{self.student} - {self.task}'
+
+
+class TaskRating(models.Model):
+    """
+    Оценка задания
+    """
+    answer = models.ForeignKey(TaskSubmission, on_delete=models.CASCADE, related_name='ratings')
+    rating = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f'{self.answer} - {self.rating}'
+>>>>>>> e6f268d1e21adf5848392f8928c09645e3a08976
