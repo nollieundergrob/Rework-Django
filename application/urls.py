@@ -1,50 +1,31 @@
-from django.urls import path
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework_simplejwt.views import TokenRefreshView
+
 from .views import (
-    UserModelView,
-    GroupView,
-    StudentProfileView,
-    TeacherProfileView,
-    TaskView,
-    LoginUser,
-    RegisterUser,
+    CustomTokenObtainPairView,
+    RegisterUserView,
+    UserListCreateView,
+    AttendanceRecordListCreateView,
+    GroupListCreateView,
 )
 
-# utils_pattern = [
-#     path('attendance/', utils.AttendanceReportGenerator.generate_report,)
-# ]
-# Маршруты для пользователей
-user_patterns = [
-    path('api/v1/users/', UserModelView.as_view(), name='user-list'),
-    path('api/v1/users/<int:pk>/', UserModelView.as_view(), name='user-detail'),
-]
+urlpatterns = [
+    # Админка
+    path('admin/', admin.site.urls),
 
-# Маршруты для групп
-group_patterns = [
-    path('api/v1/groups/', GroupView.as_view(), name='group-list'),
-    path('api/v1/groups/<int:pk>/', GroupView.as_view(), name='group-detail'),
-]
+    # Авторизация
+    path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/register/', RegisterUserView.as_view(), name='register'),
 
-# Маршруты для студентов
-student_patterns = [
-    path('api/v1/students/', StudentProfileView.as_view(), name='student-list'),
-    path('api/v1/students/<int:pk>/', StudentProfileView.as_view(), name='student-detail'),
-]
-# Маршруты для учителей
-teacher_patterns = [
-    path('api/v1/teachers/', TeacherProfileView.as_view(), name='teacher-list'),
-    path('api/v1/teachers/<int:pk>/', TeacherProfileView.as_view(), name='teacher-detail'),
-]
+    # Пользователи
+    path('users/', UserListCreateView.as_view(), name='user_list_create'),
 
-# Маршруты для заданий
-task_patterns = [
-    path('api/v1/tasks/', TaskView.as_view(), name='task-list'),
-    path('api/v1/tasks/<int:pk>/', TaskView.as_view(), name='task-detail'),
-]
 
-# Марсрушты для вьюшек
-view_patterns = [
-    path('login/',LoginUser.as_view(),name='login'),
-    path('register/',RegisterUser.as_view(), name='register')
+    # Логи посещаемости
+    path('attendance/', AttendanceRecordListCreateView.as_view(), name='attendance_list_create'),
+
+    # Группы
+    path('groups/', GroupListCreateView.as_view(), name='group_list_create'),
 ]
-# Финальный список маршрутов
-urlpatterns = view_patterns+ user_patterns + group_patterns + student_patterns + teacher_patterns + task_patterns  
