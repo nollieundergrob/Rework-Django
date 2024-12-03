@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    AttendanceTableView,
     UserModelView,
     GroupView,
     StudentProfileView,
@@ -31,6 +32,7 @@ student_patterns = [
 ]
 # Маршруты для учителей
 teacher_patterns = [
+    path('api/v1/attendance-table/', AttendanceTableView.as_view(), name='attendance-table'),
     path('api/v1/teachers/', TeacherProfileView.as_view(), name='teacher-list'),
     path('api/v1/teachers/<int:pk>/', TeacherProfileView.as_view(), name='teacher-detail'),
 ]
@@ -45,6 +47,7 @@ task_patterns = [
 view_patterns = [
     path('login/',LoginUser.as_view(),name='login'),
     path('register/',RegisterUser.as_view(), name='register')
+    
 ]
 # Финальный список маршрутов
 urlpatterns = view_patterns+ user_patterns + group_patterns + student_patterns + teacher_patterns + task_patterns  

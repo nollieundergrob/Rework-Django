@@ -102,16 +102,3 @@ class TaskRating(models.Model):
 
     def __str__(self):
         return f'{self.answer} - {self.rating}'
-
-
-class AttendanceRecord(models.Model):
-    student = models.ForeignKey('StudentProfile', on_delete=models.CASCADE, related_name='attendance_records')
-    date = models.DateField()
-    morning_status = models.CharField(max_length=50, null=True, blank=True)
-    lunch_status = models.CharField(max_length=50, null=True, blank=True)
-    morning_time = models.TimeField(null=True, blank=True)
-    lunch_time = models.TimeField(null=True, blank=True)
-    lateness = models.CharField(max_length=5, default='', blank=True)
-
-    def __str__(self):
-        return f'{self.student} - {self.date}'

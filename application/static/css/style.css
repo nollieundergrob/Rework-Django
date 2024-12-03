@@ -1,9 +1,14 @@
 /* Общий стиль для контейнера формы */
+*{
+    margin: 0;
+    padding: 0;
+}
 .form-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 95vh;
+    padding: 30px;
     background: linear-gradient(135deg, #6a11cb, #2575fc);
     font-family: 'Arial', sans-serif;
 }
@@ -88,4 +93,10 @@
     
     background-color: #e2e2e2;
 
+}
+#responseMessage{
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #f2f2f2;
 }

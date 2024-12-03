@@ -1,3 +1,6 @@
+import pandas
+
+
 def get_root_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
@@ -6,5 +9,4 @@ def get_root_ip(request):
     else:
         client_ip = request.META.get('REMOTE_ADDR')
     return client_ip
-
 

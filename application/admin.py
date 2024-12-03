@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserModel, Group, StudentProfile, TeacherProfile, Attendance, Task, TaskSubmission, TaskRating, AttendanceRecord
+from .models import UserModel, Group, StudentProfile, TeacherProfile, Attendance, Task, TaskSubmission, TaskRating
 
 @admin.register(UserModel)
 class UserModelAdmin(admin.ModelAdmin):
@@ -52,10 +52,3 @@ class TaskRatingAdmin(admin.ModelAdmin):
     list_display = ('answer', 'rating')
     search_fields = ('answer__student',)
     list_filter = ('rating',)
-
-
-@admin.register(AttendanceRecord)
-class AttendanceRecordAdmin(admin.ModelAdmin):
-    list_display = ('student', 'date', 'morning_status', 'lunch_status', 'lateness')
-    search_fields = ('student__user__user_full_name', 'date')
-    list_filter = ('date',)

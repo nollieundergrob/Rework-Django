@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="form-container">
-    <form action="" method="post" class="styled-form">
+    <form id="loginForm" class="styled-form">
         {% csrf_token %}
         <h2>Login</h2>
         <div class="form-group">
@@ -13,6 +13,49 @@
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
         </div>
         <button type="submit" class="btn-submit">Login</button>
+        <div id="responseMessage"></div>
     </form>
+    
 </div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function (event) {
+        event.preventDefault(); // Отключаем стандартное поведение формы
+
+        // Считываем данные из формы
+        const formData = {
+            login: document.getElementById('login').value,
+            password: document.getElementById('password').value,
+        };
+
+        try {
+            const response = await fetch('/login/', { // Укажите правильный URL для логина
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}', // Добавляем CSRF-токен
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const responseMessage = document.getElementById('responseMessage');
+            const data = await response.json();
+
+            if (response.ok) {
+                responseMessage.textContent = 'Login successful! Tokens received.';
+                // console.log('Access Token:', data.access);
+                // console.log('Refresh Token:', data.refresh);
+
+                // Сохраняем токены в localStorage (по желанию)
+                localStorage.setItem('access', data.access);
+                localStorage.setItem('refresh', data.refresh);
+            } else {
+                responseMessage.textContent = `Error: ${data.error}`;
+                // console.error('Error details:', data.details || data);
+            }
+        } catch (error) {
+            console.error('Request failed:', error);
+        }
+    });
+</script>
 {% endblock %}
