@@ -47,10 +47,26 @@ from rest_framework.permissions import AllowAny
 from .models import UserModel
 from .serializers import UserSerializer
 
+from django.contrib.auth.hashers import make_password
+
 class UserListCreateUpdateView(generics.ListCreateAPIView, mixins.UpdateModelMixin):
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        # Хэширование пароля при создании пользователя
+        password = serializer.validated_data.get('password')
+        if password:
+            serializer.validated_data['password'] = make_password(password)
+        serializer.save()
+
+    def perform_update(self, serializer):
+        # Хэширование пароля при обновлении пользователя
+        password = serializer.validated_data.get('password', None)
+        if password:
+            serializer.validated_data['password'] = make_password(password)
+        serializer.save()
 
     def put(self, request, *args, **kwargs):
         # Метод PUT для обновления данных
@@ -59,6 +75,7 @@ class UserListCreateUpdateView(generics.ListCreateAPIView, mixins.UpdateModelMix
     def patch(self, request, *args, **kwargs):
         # Метод PATCH для частичного обновления данных
         return self.partial_update(request, *args, **kwargs)
+
 
 
 class AttendanceRecordListCreateView(generics.ListCreateAPIView):

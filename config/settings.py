@@ -32,6 +32,24 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",  # Или ваш тестовый сервер
 
 ]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+    "x-csrftoken",
+    "accept",
+]
+
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
@@ -46,7 +64,8 @@ INSTALLED_APPS = [
     'application.apps.ApplicationConfig',
     'corsheaders',
     'rest_framework',
-    'rest_framework_simplejwt', 
+    'rest_framework_simplejwt',
+    'localpypi.apps.LocalpypiConfig' 
 ]
 
 from datetime import timedelta
@@ -167,4 +186,42 @@ import os
 
 AUTH_USER_MODEL = 'application.UserModel'
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# LocalPypi Libraries
+
+SIMPLE_LIBS_DIR = os.path.join(BASE_DIR, 'simple')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # Кэш в памяти
+        'LOCATION': 'unique-snowflake',
+    },
+    'file_cache': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache'),
+    },
+}
 

@@ -13,9 +13,7 @@ from .views import (
     AggregatedAttendanceDownloadView,
 )
 
-urlpatterns = [
-    # Админка
-    path('admin/', admin.site.urls),
+urlpatterns = [ 
 
     # Авторизация
     path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -23,8 +21,8 @@ urlpatterns = [
     # path('auth/register/', RegisterUserView.as_view(), name='register'),
 
     # Пользователи
-    path('users/', UserListCreateUpdateView.as_view(), name='user_list_create'),
-    path('users/<int:pk>/', UserListCreateUpdateView.as_view(), name='user_update'),
+    path('data/', UserListCreateUpdateView.as_view(), name='user_list_create'),
+    path('data/<int:pk>/', UserListCreateUpdateView.as_view(), name='user_update'),
 
     # Логи посещаемости
     path('attendance/aggregated/download/', AggregatedAttendanceDownloadView.as_view(), name='aggregated_attendance'),

@@ -11,15 +11,12 @@ class JWTAuthMiddleware:
         self.jwt_authenticator = JWTAuthentication()
 
     def __call__(self, request):
-        logger.debug(f"Request path: {request.path}, Method: {request.method}")
-        if request.path in ['/auth/login/', '/users/']:
-            return self.get_response(request)
-
         try:
-            user, token = self.jwt_authenticator.authenticate(request)
-            if user:
+            # Аутентификация только если токен предоставлен
+            auth_result = self.jwt_authenticator.authenticate(request)
+            if auth_result:
+                user, token = auth_result
                 request.user = user
-                logger.info(f"Authenticated user: {user.username}")
         except AuthenticationFailed as e:
             logger.warning(f"Authentication failed: {e}")
             return JsonResponse({"error": "Invalid or expired token"}, status=401)
@@ -28,15 +25,3 @@ class JWTAuthMiddleware:
             return JsonResponse({"error": "Authentication error"}, status=400)
 
         return self.get_response(request)
-
-
-
-class LogAllRequestsMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        logger.info(f"Request: {request.method} {request.path}")
-        response = self.get_response(request)
-        logger.info(f"Response: {response.status_code} for {request.method} {request.path}")
-        return response
