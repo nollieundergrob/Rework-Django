@@ -59,3 +59,12 @@ class AddUserToGroupSerializer(serializers.Serializer):
         if user.role != role:
             raise serializers.ValidationError(f"Пользователь с ID {user_id} не является {role}.")
         return data
+
+class AggregatedAttendanceSerializer(serializers.Serializer):
+    full_name = serializers.CharField()
+    date = serializers.DateField(format='%d.%m.%Y')
+    morning_entry = serializers.TimeField(allow_null=True)
+    afternoon_entry = serializers.TimeField(allow_null=True)
+    late_morning = serializers.BooleanField()
+    late_afternoon = serializers.BooleanField()
+    has_lateness = serializers.BooleanField()

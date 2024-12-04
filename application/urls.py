@@ -5,10 +5,12 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     CustomTokenObtainPairView,
     RegisterUserView,
-    UserListCreateView,
+    UserListCreateUpdateView,
     AttendanceRecordListCreateView,
     GroupListCreateView,
-    AddUserToGroupView
+    AddUserToGroupView,
+    AggregatedAttendanceView,
+    AggregatedAttendanceDownloadView,
 )
 
 urlpatterns = [
@@ -21,10 +23,12 @@ urlpatterns = [
     # path('auth/register/', RegisterUserView.as_view(), name='register'),
 
     # Пользователи
-    path('users/', UserListCreateView.as_view(), name='user_list_create'),
-
+    path('users/', UserListCreateUpdateView.as_view(), name='user_list_create'),
+    path('users/<int:pk>/', UserListCreateUpdateView.as_view(), name='user_update'),
 
     # Логи посещаемости
+    path('attendance/aggregated/download/', AggregatedAttendanceDownloadView.as_view(), name='aggregated_attendance'),
+    path('attendance/aggregated/', AggregatedAttendanceView.as_view(), name='aggregated_attendance'),
     path('attendance/', AttendanceRecordListCreateView.as_view(), name='attendance_list_create'),
 
     # Группы
