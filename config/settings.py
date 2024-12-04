@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Если вы работаете на React с localhost
+    "http://localhost:5173",  # Если вы работаете на React с localhost
     "http://127.0.0.1:8000",  # Или ваш тестовый сервер
 
 ]
