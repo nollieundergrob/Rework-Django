@@ -6,7 +6,6 @@ class ApplicationConfig(AppConfig):
 
     def ready(self):
         # Убедитесь, что файл signals.py существует, или уберите следующую строку
-        try:
-            import application.signals
-        except ImportError:
-            pass
+        import application.signals
+        
+

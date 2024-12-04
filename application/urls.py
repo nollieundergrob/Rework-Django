@@ -8,6 +8,7 @@ from .views import (
     UserListCreateView,
     AttendanceRecordListCreateView,
     GroupListCreateView,
+    AddUserToGroupView
 )
 
 urlpatterns = [
@@ -28,5 +29,6 @@ urlpatterns = [
 
     # Группы
     path('groups/', GroupListCreateView.as_view(), name='group_list_create'),
+    path('groups/<int:group_id>/add_user/', AddUserToGroupView.as_view(), name='add_user_to_group'),
 ]
 

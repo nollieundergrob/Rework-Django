@@ -40,3 +40,22 @@ class AttendanceRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttendanceRecord
         fields = '__all__'
+
+class AddUserToGroupSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    role = serializers.ChoiceField(choices=['teacher', 'student'])
+
+    def validate(self, data):
+        user_id = data.get('user_id')
+        role = data.get('role')
+
+        # Проверяем, существует ли пользователь с таким ID
+        try:
+            user = UserModel.objects.get(id=user_id)
+        except UserModel.DoesNotExist:
+            raise serializers.ValidationError("Пользователь с таким ID не найден.")
+
+        # Проверяем роль пользователя
+        if user.role != role:
+            raise serializers.ValidationError(f"Пользователь с ID {user_id} не является {role}.")
+        return data
