@@ -70,7 +70,7 @@ class AddUserToGroupSerializer(serializers.Serializer):
         return data
 
 class AggregatedAttendanceSerializer(serializers.Serializer):
-    id =serializers.IntegerField()
+    id = serializers.IntegerField()
     username = serializers.CharField()
     full_name = serializers.CharField()
     date = serializers.DateField(format='%d.%m.%Y')
@@ -85,7 +85,7 @@ class AggregatedAttendanceSerializer(serializers.Serializer):
 class AttendanceFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttendanceFile
-        fields = ['id','record', 'file']
+        fields = ['id', 'user', 'date', 'file']
 
 
 class AttendanceRecordSerializer(serializers.ModelSerializer):
@@ -101,6 +101,8 @@ class AttendanceRecordSerializer(serializers.ModelSerializer):
         attendance_record = super().create(validated_data)
 
         if file_data:
-            AttendanceFile.objects.create(record=attendance_record, file=file_data)
+            # Используем дату из timestamp для привязки файла
+            date = validated_data['timestamp'].date()
+            AttendanceFile.objects.create(date=date, file=file_data)
 
         return attendance_record

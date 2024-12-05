@@ -72,10 +72,9 @@ class AttendanceRecord(models.Model):
         return self.attendancefile_set.exists()
 
 class AttendanceFile(models.Model):
-    record = models.ForeignKey(
-        AttendanceRecord, 
-        on_delete=models.CASCADE, 
-        related_name='files',
-        verbose_name='Пользователь'
-    )
-    file = models.FileField(upload_to='attendance/files')
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='attendance_files')
+    date = models.DateField()  # Привязка файла к дате
+    file = models.FileField(upload_to='attendance/files')  # Загружаемый файл
+
+    def __str__(self):
+        return f"File for {self.user.username} on {self.date}: {self.file.name}"

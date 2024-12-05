@@ -1,5 +1,16 @@
 from django.contrib import admin
-from .models import UserModel, Group, AttendanceRecord
+from .models import UserModel, Group, AttendanceRecord,AttendanceFile
+
+@admin.register(AttendanceFile)
+class AttendanceFileAdmin(admin.ModelAdmin):
+    """
+    Админка для модели AttendanceFile.
+    """
+    list_display = ('user', 'date', 'file')  # Отображение пользователя, даты и файла
+    search_fields = ('date', 'user__username')  # Поиск по дате и имени пользователя
+    list_filter = ('date', 'user')  # Фильтрация по дате и пользователю
+
+
 
 
 @admin.register(UserModel)
