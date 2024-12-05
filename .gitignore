@@ -1,6 +1,9 @@
 #Media Folers
 media/
 
+#PypiLibrary Folder
+simple/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

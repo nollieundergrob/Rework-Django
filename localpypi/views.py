@@ -17,8 +17,8 @@ class LibraryListView(APIView):
         libraries = PypiLibraries.objects.all()
         if not libraries.exists():
             return Response({'message': 'Список загруженных библиотек пока-что пустой'}, status=status.HTTP_200_OK)
-        serializer = PypiLibrarySerializer(libraries, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = [{'name':item.name,'link':f'http://{request.get_host()}/simple/{item.name}'} for item in libraries]
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class LibraryDetailView(APIView):

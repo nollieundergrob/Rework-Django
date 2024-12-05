@@ -61,6 +61,7 @@ class AddUserToGroupSerializer(serializers.Serializer):
         return data
 
 class AggregatedAttendanceSerializer(serializers.Serializer):
+    username = serializers.CharField()
     full_name = serializers.CharField()
     date = serializers.DateField(format='%d.%m.%Y')
     morning_entry = serializers.TimeField(allow_null=True)

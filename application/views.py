@@ -158,6 +158,9 @@ class AggregatedAttendanceView(APIView):
         user_param = request.query_params.get('user', None)
         role_param = request.query_params.get('role', None)
 
+        if user_param:
+            query_set = query_set.filter(user_username=user_param)
+        
         # Фильтрация данных по роли
         if role_param in ['student', 'teacher']:
             query_set = query_set.filter(
@@ -207,6 +210,7 @@ class AggregatedAttendanceView(APIView):
             has_lateness = late_morning or late_afternoon
 
             aggregated_data.append({
+                'username':f'{user.username}',
                 'full_name': f"{user.last_name} {user.first_name}",
                 'group': group_names,
                 'date': date,
@@ -233,6 +237,9 @@ class AggregatedAttendanceDownloadView(APIView):
         user_param = request.query_params.get('user', None)
         role_param = request.query_params.get('role', None)
 
+        if user_param:
+            query_set = query_set.filter(user_username=user_param)
+        
         # Фильтрация данных по роли
         if role_param in ['student', 'teacher']:
             query_set = query_set.filter(
@@ -293,6 +300,7 @@ class AggregatedAttendanceDownloadView(APIView):
             has_lateness = late_morning or late_afternoon
 
             aggregated_data.append({
+                'username':f'{user.username}',
                 'full_name': f"{user.last_name} {user.first_name}",
                 'group': group_names,
                 'date': date,
@@ -308,6 +316,7 @@ class AggregatedAttendanceDownloadView(APIView):
 
         # Указываем правильный порядок столбцов и их заголовки
         df = df[[
+            'username',
             'full_name',
             'group',
             'date',
@@ -320,6 +329,7 @@ class AggregatedAttendanceDownloadView(APIView):
 
         # Переименовываем столбцы на понятные
         df.columns = [
+            'Username',
             'Фамилия и имя',
             'Группа',
             'Дата',
