@@ -67,52 +67,73 @@ class UserListCreateUpdateView(generics.ListCreateAPIView, mixins.UpdateModelMix
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-    def perform_create(self, serializer):
-        """Переопределяем создание пользователя для хеширования пароля."""
-        user = serializer.save(password=make_password(serializer.validated_data['password']))
-        return user
 
     def post(self, request, *args, **kwargs):
         """Создаёт пользователя и возвращает токен при успешной регистрации."""
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            # Сохраняем пользователя
-            user = self.perform_create(serializer)
+            try:
+                # Сохраняем пользователя
+                user = serializer.save()
 
-            # Генерируем токены для зарегистрированного пользователя
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
+                if user is None:
+                    raise ValueError("Failed to create user")
 
-            # Логируем посещение
-            AttendanceRecord.objects.create(
-                user=user,
-                timestamp=now(),
-                ip_address=request.META.get('REMOTE_ADDR', 'Unknown'),
-                user_agent=request.META.get('HTTP_USER_AGENT', 'Unknown'),
-                request_method=request.method,
-                request_url=request.build_absolute_uri(),
-            )
+                # Генерируем токены для зарегистрированного пользователя
+                refresh = RefreshToken.for_user(user)
+                access_token = str(refresh.access_token)
 
-            logger.info(f"User {user.username} registered and attendance logged")
+                # Логируем посещение
+                AttendanceRecord.objects.create(
+                    user=user,
+                    timestamp=now(),
+                    ip_address=request.META.get('REMOTE_ADDR', 'Unknown'),
+                    user_agent=request.META.get('HTTP_USER_AGENT', 'Unknown'),
+                    request_method=request.method,
+                    request_url=request.build_absolute_uri(),
+                )
 
-            # Формируем пользовательскую часть ответа
-            user_data = {
-                "username": user.username,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "role": user.role if hasattr(user, 'role') else "undefined",  # Если поле `role` отсутствует
-                "telegram_username": user.telegram_username if hasattr(user, 'telegram_username') else None
-            }
+                logger.info(f"User {user.username} registered and attendance logged")
 
-            # Формируем итоговый ответ
-            response_data = {
-                "user": user_data,
-                "accessToken": access_token,
-                "error": False,
-                "status": "success"
-            }
+                # Формируем пользовательскую часть ответа
+                user_data = {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "role": user.role if hasattr(user, 'role') else "undefined",
+                    "telegram_username": user.telegram_username if hasattr(user, 'telegram_username') else None,
+                }
 
-            return Response(response_data, status=status.HTTP_201_CREATED)
+                # Формируем итоговый ответ
+                response_data = {
+                    "user": user_data,
+                    "accessToken": access_token,
+                    "error": False,
+                    "status": "success",
+                }
+
+                return Response(response_data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                logger.error(f"Error during user creation: {str(e)}")
+                return Response(
+                    {
+                        "error": True,
+                        "status": "failed",
+                        "message": f"User creation failed due to server error. {str(e)} "
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+        # Если данные некорректны, возвращаем ошибку
+        return Response(
+            {
+                "error": True,
+                "status": "failed",
+                "message": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
         
         # Если данные некорректны, возвращаем ошибку
         return Response(
