@@ -70,6 +70,8 @@ class UserListCreateUpdateView(generics.ListCreateAPIView, mixins.UpdateModelMix
 
     def post(self, request, *args, **kwargs):
         """Создаёт пользователя и возвращает токен при успешной регистрации."""
+        if 'role' not in request.data:
+            request.data['role'] = 'student'
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             try:

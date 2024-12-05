@@ -14,6 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Создание нового пользователя с хэшированием пароля
+        if 'role' not in validated_data:
+            validated_data['role'] == 'student'
         user = UserModel(
             username=validated_data['username'],
             first_name=validated_data['first_name'],
