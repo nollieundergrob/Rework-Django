@@ -196,23 +196,42 @@ class AttendanceRecordListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 class AttachFileToAttendanceView(APIView):
-    def post(self, request, record_id):
-        try:
-            record = AttendanceRecord.objects.get(id=record_id)
-        except AttendanceRecord.DoesNotExist:
-            return Response({"error": "Запись посещаемости не найдена"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    """
+    Эндпоинт для добавления файла, связанного с пользователем и датой.
+    """
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+        user_id = request.data.get('user_id')
+        date = request.data.get('date')
         file = request.FILES.get('file')
-        if not file:
-            return Response({"error": "Файл не предоставлен"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Проверяем наличие всех необходимых данных
+        if not user_id or not date or not file:
+            return Response(
+                {"error": "Пожалуйста, предоставьте user_id, дату (в формате YYYY-MM-DD) и файл."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Проверяем существование пользователя
         try:
-            attendance_file = AttendanceFile.objects.create(record=record, file=file)
+            user = UserModel.objects.get(id=user_id)
+        except UserModel.DoesNotExist:
+            return Response({"error": "Пользователь не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Проверяем корректность формата даты
+        try:
+            date_obj = pd.to_datetime(date).date()
+        except ValueError:
+            return Response({"error": "Некорректный формат даты. Используйте YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Создаем файл
+        try:
+            attendance_file = AttendanceFile.objects.create(user=user, date=date_obj, file=file)
         except Exception as e:
             return Response({"error": f"Ошибка при добавлении файла: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        # Сериализация и ответ
         serializer = AttendanceFileSerializer(attendance_file)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
