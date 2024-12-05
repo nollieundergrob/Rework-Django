@@ -40,6 +40,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 logger.info(f"Attendance logged for user {user.username}")
             except UserModel.DoesNotExist:
                 logger.error(f"User {username} not found for attendance logging")
+        print(response)
         return response
 
 from rest_framework import generics, mixins
@@ -49,17 +50,87 @@ from .serializers import UserSerializer
 
 from django.contrib.auth.hashers import make_password
 
+from rest_framework import generics, mixins, status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils.timezone import now
+from .models import UserModel, AttendanceRecord
+from .serializers import UserSerializer
+from django.contrib.auth.hashers import make_password
+import logging
+
+logger = logging.getLogger(__name__)
+
 class UserListCreateUpdateView(generics.ListCreateAPIView, mixins.UpdateModelMixin):
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+    def perform_create(self, serializer):
+        """Переопределяем создание пользователя для хеширования пароля."""
+        user = serializer.save(password=make_password(serializer.validated_data['password']))
+        return user
+
+    def post(self, request, *args, **kwargs):
+        """Создаёт пользователя и возвращает токен при успешной регистрации."""
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            # Сохраняем пользователя
+            user = self.perform_create(serializer)
+
+            # Генерируем токены для зарегистрированного пользователя
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            # Логируем посещение
+            AttendanceRecord.objects.create(
+                user=user,
+                timestamp=now(),
+                ip_address=request.META.get('REMOTE_ADDR', 'Unknown'),
+                user_agent=request.META.get('HTTP_USER_AGENT', 'Unknown'),
+                request_method=request.method,
+                request_url=request.build_absolute_uri(),
+            )
+
+            logger.info(f"User {user.username} registered and attendance logged")
+
+            # Формируем пользовательскую часть ответа
+            user_data = {
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "role": user.role if hasattr(user, 'role') else "undefined",  # Если поле `role` отсутствует
+                "telegram_username": user.telegram_username if hasattr(user, 'telegram_username') else None
+            }
+
+            # Формируем итоговый ответ
+            response_data = {
+                "user": user_data,
+                "accessToken": access_token,
+                "error": False,
+                "status": "success"
+            }
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        
+        # Если данные некорректны, возвращаем ошибку
+        return Response(
+            {
+                "error": True,
+                "status": "failed",
+                "message": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     def put(self, request, *args, **kwargs):
+        """Обновление пользователя."""
         return self.update(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
+        """Частичное обновление пользователя."""
         return self.partial_update(request, *args, **kwargs)
-
 
 
 class AttendanceRecordListCreateView(generics.ListCreateAPIView):
