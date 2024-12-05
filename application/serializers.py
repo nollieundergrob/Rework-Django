@@ -1,7 +1,7 @@
 from datetime import date, time
 from rest_framework import serializers
 from datetime import time
-from .models import AttendanceRecord, UserModel, Group
+from .models import AttendanceFile, AttendanceRecord, UserModel, Group
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,12 +48,7 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ['id', 'name', 'teachers', 'students']
 
-class AttendanceRecordSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
 
-    class Meta:
-        model = AttendanceRecord
-        fields = '__all__'
 
 class AddUserToGroupSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
@@ -75,6 +70,7 @@ class AddUserToGroupSerializer(serializers.Serializer):
         return data
 
 class AggregatedAttendanceSerializer(serializers.Serializer):
+    id =serializers.IntegerField()
     username = serializers.CharField()
     full_name = serializers.CharField()
     date = serializers.DateField(format='%d.%m.%Y')
@@ -83,3 +79,28 @@ class AggregatedAttendanceSerializer(serializers.Serializer):
     late_morning = serializers.BooleanField()
     late_afternoon = serializers.BooleanField()
     has_lateness = serializers.BooleanField()
+    files = serializers.ListField()
+    
+
+class AttendanceFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendanceFile
+        fields = ['id','record', 'file']
+
+
+class AttendanceRecordSerializer(serializers.ModelSerializer):
+    files = AttendanceFileSerializer(many=True, read_only=True)
+    file_upload = serializers.FileField(write_only=True, required=False)
+
+    class Meta:
+        model = AttendanceRecord
+        fields = ['id', 'user', 'timestamp', 'files', 'file_upload']
+
+    def create(self, validated_data):
+        file_data = validated_data.pop('file_upload', None)
+        attendance_record = super().create(validated_data)
+
+        if file_data:
+            AttendanceFile.objects.create(record=attendance_record, file=file_data)
+
+        return attendance_record

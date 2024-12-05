@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
+    AttachFileToAttendanceView,
     CustomTokenObtainPairView,
     RegisterUserView,
     UserListCreateUpdateView,
@@ -28,6 +29,7 @@ urlpatterns = [
     path('attendance/aggregated/download/', AggregatedAttendanceDownloadView.as_view(), name='aggregated_attendance'),
     path('attendance/aggregated/', AggregatedAttendanceView.as_view(), name='aggregated_attendance'),
     path('attendance/', AttendanceRecordListCreateView.as_view(), name='attendance_list_create'),
+    path('attendance/<int:record_id>/attach_file/', AttachFileToAttendanceView.as_view(), name='attach_file_to_attendance'),
 
     # Группы
     path('groups/', GroupListCreateView.as_view(), name='group_list_create'),

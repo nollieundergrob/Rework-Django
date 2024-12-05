@@ -67,3 +67,15 @@ class AttendanceRecord(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.timestamp}"
+    @property
+    def has_files(self):
+        return self.attendancefile_set.exists()
+
+class AttendanceFile(models.Model):
+    record = models.ForeignKey(
+        AttendanceRecord, 
+        on_delete=models.CASCADE, 
+        related_name='files',
+        verbose_name='Пользователь'
+    )
+    file = models.FileField(upload_to='attendance/files')

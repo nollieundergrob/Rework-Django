@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.timezone import now
-from .models import AttendanceRecord, UserModel, Group
-from .serializers import AttendanceRecordSerializer, UserSerializer, GroupSerializer,AddUserToGroupSerializer,AggregatedAttendanceSerializer
+from .models import AttendanceFile, AttendanceRecord, UserModel, Group
+from .serializers import AttendanceFileSerializer, AttendanceRecordSerializer, UserSerializer, GroupSerializer,AddUserToGroupSerializer,AggregatedAttendanceSerializer
 import logging
+from django.db import models
 from django.utils.timezone import localtime
 from collections import defaultdict
 from datetime import time 
@@ -164,11 +165,19 @@ class AttendanceRecordListCreateView(generics.ListCreateAPIView):
         queryset = AttendanceRecord.objects.all().order_by('-timestamp')
         user_param = self.request.query_params.get('user', None)
         date_param = self.request.query_params.get('date', None)
-
+        has_files = self.request.query_params.get('has_files',None)
+        
         # Фильтрация по пользователю
         if user_param:
             queryset = queryset.filter(user__username=user_param)
 
+        if has_files is not None:  # "has_files" будет 'true' или 'false'
+            if has_files.lower() == 'true':
+                queryset = queryset.filter(files__isnull=False)
+            elif has_files.lower() == 'false':
+                queryset = queryset.filter(files__isnull=True)
+ 
+            
         # Фильтрация по дате
         if date_param:
             try:
@@ -181,6 +190,30 @@ class AttendanceRecordListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class AttachFileToAttendanceView(APIView):
+    def post(self, request, record_id):
+        try:
+            record = AttendanceRecord.objects.get(id=record_id)
+        except AttendanceRecord.DoesNotExist:
+            return Response({"error": "Запись посещаемости не найдена"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        file = request.FILES.get('file')
+        if not file:
+            return Response({"error": "Файл не предоставлен"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            attendance_file = AttendanceFile.objects.create(record=record, file=file)
+        except Exception as e:
+            return Response({"error": f"Ошибка при добавлении файла: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = AttendanceFileSerializer(attendance_file)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
 
 class GroupListCreateView(generics.ListCreateAPIView):
     queryset = Group.objects.all()
@@ -235,37 +268,43 @@ class AggregatedAttendanceView(APIView):
         date_param = request.query_params.get('date', None)
         user_param = request.query_params.get('user', None)
         role_param = request.query_params.get('role', None)
+        has_files = request.query_params.get('has_files', None)
+
+        if has_files is not None:
+            if has_files.lower() == 'true':
+                query_set = query_set.filter(files__isnull=False)
+            elif has_files.lower() == 'false':
+                query_set = query_set.filter(files__isnull=True)
 
         if user_param:
-            query_set = query_set.filter(user_username=user_param)
-        
-        # Фильтрация данных по роли
+            query_set = query_set.filter(user__username=user_param)
+
         if role_param in ['student', 'teacher']:
             query_set = query_set.filter(
                 user__role=role_param
             ).select_related('user').prefetch_related('user__student_groups', 'user__teacher_groups')
-        # Фильтрация данных
+
         if date_param:
             try:
                 date_filter = pd.to_datetime(date_param).date()
-                query_set = query_set.filter(timestamp__date=date_filter).select_related('user').prefetch_related('user__student_groups', 'user__teacher_groups')
+                query_set = query_set.filter(timestamp__date=date_filter)
             except ValueError:
                 return HttpResponse("Invalid date format. Use YYYY-MM-DD.", status=400)
-        elif user_param:
-            query_set = query_set.filter(user__username=user_param).select_related('user').prefetch_related('user__student_groups', 'user__teacher_groups')
+
         # Сгруппировать данные по пользователю и дате
         grouped_logs = {}
         for log in query_set:
             user = log.user
             date = log.timestamp.date()
             time_of_entry = log.timestamp.time()
-
+            files = ['http://'+request.get_host()+f.file.url for f in AttendanceFile.objects.filter(record__timestamp__date=date, record__user=user)] or ["Файлов нет"]
             if (user, date) not in grouped_logs:
                 grouped_logs[(user, date)] = {
                     'user': user,
                     'date': date,
                     'morning_entry': None,
-                    'afternoon_entry': None
+                    'afternoon_entry': None,
+                    'files':files
                 }
 
             # Утренний вход
@@ -288,7 +327,8 @@ class AggregatedAttendanceView(APIView):
             has_lateness = late_morning or late_afternoon
 
             aggregated_data.append({
-                'username':f'{user.username}',
+                'id':f'{user.id}',
+                'username': f'{user.username}',
                 'full_name': f"{user.last_name} {user.first_name}",
                 'group': group_names,
                 'date': date,
@@ -296,7 +336,8 @@ class AggregatedAttendanceView(APIView):
                 'afternoon_entry': logs['afternoon_entry'],
                 'late_morning': late_morning,
                 'late_afternoon': late_afternoon,
-                'has_lateness': has_lateness
+                'has_lateness': has_lateness,
+                'files': logs['files']
             })
 
         # Сериализация данных
@@ -309,126 +350,84 @@ class AggregatedAttendanceDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        # Получаем параметры запроса
         query_set = AttendanceRecord.objects.all()
         date_param = request.query_params.get('date', None)
         user_param = request.query_params.get('user', None)
         role_param = request.query_params.get('role', None)
+        has_files = request.query_params.get('has_files', None)
+
+        if has_files is not None:
+            if has_files.lower() == 'true':
+                query_set = query_set.filter(files__isnull=False)
+            elif has_files.lower() == 'false':
+                query_set = query_set.filter(files__isnull=True)
 
         if user_param:
-            query_set = query_set.filter(user_username=user_param)
-        
-        # Фильтрация данных по роли
+            query_set = query_set.filter(user__username=user_param)
+
         if role_param in ['student', 'teacher']:
             query_set = query_set.filter(
                 user__role=role_param
             ).select_related('user').prefetch_related('user__student_groups', 'user__teacher_groups')
-        # Фильтрация данных
+
         if date_param:
             try:
                 date_filter = pd.to_datetime(date_param).date()
-                query_set = query_set.filter(timestamp__date=date_filter).select_related('user').prefetch_related('user__student_groups', 'user__teacher_groups')
+                query_set = query_set.filter(timestamp__date=date_filter)
             except ValueError:
                 return HttpResponse("Invalid date format. Use YYYY-MM-DD.", status=400)
-        elif user_param:
-            query_set = query_set.filter(user__username=user_param).select_related('user').prefetch_related('user__student_groups', 'user__teacher_groups')
-    
-        # Агрегация данных
-        data = defaultdict(lambda: {
-            'group': None,
-            'morning_entry': None,
-            'afternoon_entry': None,
-            'late_morning': None,
-            'late_afternoon': None,
-            'has_lateness': None,
-        })
 
-        # Сгруппировать данные по пользователю и дате
-        grouped_logs = {}
+        # Агрегация данных
+        aggregated_data = []
         for log in query_set:
             user = log.user
             date = log.timestamp.date()
             time_of_entry = log.timestamp.time()
 
-            if (user, date) not in grouped_logs:
-                grouped_logs[(user, date)] = {
-                    'user': user,
-                    'date': date,
-                    'morning_entry': None,
-                    'afternoon_entry': None
-                }
-
-            # Утренний вход
-            if time_of_entry < time(12, 30):
-                if grouped_logs[(user, date)]['morning_entry'] is None or time_of_entry < grouped_logs[(user, date)]['morning_entry']:
-                    grouped_logs[(user, date)]['morning_entry'] = time_of_entry
-
-            # Вход после обеда
-            elif time(12, 30) <= time_of_entry:
-                if grouped_logs[(user, date)]['afternoon_entry'] is None or time_of_entry < grouped_logs[(user, date)]['afternoon_entry']:
-                    grouped_logs[(user, date)]['afternoon_entry'] = time_of_entry
-
-        # Обработать сгруппированные данные
-        aggregated_data = []
-        for (user, date), logs in grouped_logs.items():
-            group_names = ', '.join(list(user.student_groups.values_list('name', flat=True)) + list(user.teacher_groups.values_list('name', flat=True)))
-
-            late_morning = logs['morning_entry'] and not (time(8, 0) <= logs['morning_entry'] <= time(9, 5))
-            late_afternoon = logs['afternoon_entry'] and not (time(12, 30) <= logs['afternoon_entry'] <= time(12, 45))
-            has_lateness = late_morning or late_afternoon
-
+            files = ['http://'+request.get_host()+f.file.url for f in AttendanceFile.objects.filter(record__timestamp__date=date, record__user=user)] or ["Файлов нет"]
+            
             aggregated_data.append({
-                'username':f'{user.username}',
+                'id':f'{user.id}',
+                'username': f'{user.username}',
                 'full_name': f"{user.last_name} {user.first_name}",
-                'group': group_names,
+                'group': ', '.join(list(user.student_groups.values_list('name', flat=True)) + list(user.teacher_groups.values_list('name', flat=True))),
                 'date': date,
-                'morning_entry': logs['morning_entry'],
-                'afternoon_entry': logs['afternoon_entry'],
-                'late_morning': late_morning,
-                'late_afternoon': late_afternoon,
-                'has_lateness': has_lateness
+                'morning_entry': time_of_entry if time_of_entry < time(12, 30) else None,
+                'afternoon_entry': time_of_entry if time_of_entry >= time(12, 30) else None,
+                'files': ", ".join(files)
             })
 
-        # Формируем DataFrame
+        # Создаём DataFrame
         df = pd.DataFrame(aggregated_data)
 
-        # Указываем правильный порядок столбцов и их заголовки
         df = df[[
+            'id'
             'username',
             'full_name',
             'group',
             'date',
             'morning_entry',
             'afternoon_entry',
-            'late_morning',
-            'late_afternoon',
-            'has_lateness'
+            'files'
         ]]
 
         # Переименовываем столбцы на понятные
         df.columns = [
+            'Идентификатор'
             'Username',
             'Фамилия и имя',
             'Группа',
             'Дата',
             'Время утреннего входа',
             'Время обеденного входа',
-            'Опоздание утром',
-            'Опоздание после обеда',
-            'Есть ли опоздания'
+            'Ссылки на файлы'
         ]
-
-        # Преобразуем булевые значения в читаемые строки
-        df['Опоздание утром'] = df['Опоздание утром'].apply(lambda x: 'Опоздал' if x else 'Пришел во время')
-        df['Опоздание после обеда'] = df['Опоздание после обеда'].apply(lambda x: 'Опоздал' if x else 'Пришел во время')
-        df['Есть ли опоздания'] = df['Есть ли опоздания'].apply(lambda x: 'Есть опоздания' if x else 'Нет опозданий')
 
         # Создаём файл Excel в памяти
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False, sheet_name='Attendance')
 
-        # Устанавливаем указатель в начало файла
         output.seek(0)
 
         # Подготовка ответа для скачивания файла
@@ -438,4 +437,3 @@ class AggregatedAttendanceDownloadView(APIView):
         )
         response['Content-Disposition'] = f'attachment; filename="attendance_{now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
         return response
-
