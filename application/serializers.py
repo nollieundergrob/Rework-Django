@@ -13,8 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        print(validated_data)
-        # Используем метод set_password для хэширования
+        # Создание нового пользователя с хэшированием пароля
         user = UserModel(
             username=validated_data['username'],
             first_name=validated_data['first_name'],
@@ -25,6 +24,19 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def update(self, instance, validated_data):
+        # Обновление существующего пользователя
+        for attr, value in validated_data.items():
+            if attr == 'password':
+                # Хэшируем пароль перед сохранением
+                instance.set_password(value)
+            else:
+                # Обновляем другие поля
+                setattr(instance, attr, value)
+        instance.save()
+        return instance
+
 
 class GroupSerializer(serializers.ModelSerializer):
     teachers = UserSerializer(many=True, read_only=True)

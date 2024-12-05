@@ -22,6 +22,6 @@ class JWTAuthMiddleware:
             return JsonResponse({"error": "Invalid or expired token"}, status=401)
         except Exception as e:
             logger.error(f"Unexpected authentication error: {e}")
-            return JsonResponse({"error": "Authentication error"}, status=400)
+            return JsonResponse({"error": f"Authentication error:\n{e}"}, status=400)
 
         return self.get_response(request)
