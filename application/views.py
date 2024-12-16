@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.timezone import now
-from .models import AttendanceFile, AttendanceRecord, UserModel, Group
-from .serializers import AttendanceFileSerializer, AttendanceRecordSerializer, UserSerializer, GroupSerializer,AddUserToGroupSerializer,AggregatedAttendanceSerializer
+from .models import AttendanceFile, AttendanceRecord, Schedule, UserModel, Group
+from .serializers import AttendanceFileSerializer, AttendanceRecordSerializer, ScheduleSerializer, UserSerializer, GroupSerializer,AddUserToGroupSerializer,AggregatedAttendanceSerializer
 import logging
 from django.db import models
 from django.utils.timezone import localtime
@@ -395,3 +395,13 @@ class AggregatedAttendanceDownloadView(APIView):
         )
         response['Content-Disposition'] = f'attachment; filename="attendance_{now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
         return response
+
+
+
+class ScheduleListCreateView(generics.ListCreateAPIView):
+    queryset = Schedule.objects.all()
+    serializer_class = ScheduleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save()

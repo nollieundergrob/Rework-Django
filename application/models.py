@@ -78,3 +78,19 @@ class AttendanceFile(models.Model):
 
     def __str__(self):
         return f"File for {self.user.username} on {self.date}: {self.file.name}"
+    
+    
+    
+class Schedule(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='schedules')
+    title = models.CharField(max_length=255, verbose_name="Название расписания")
+    date = models.DateField()
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.title} for {self.group.name} on {self.date}"
+
+
+   

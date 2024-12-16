@@ -1,7 +1,7 @@
 from datetime import date, time
 from rest_framework import serializers
 from datetime import time
-from .models import AttendanceFile, AttendanceRecord, UserModel, Group
+from .models import AttendanceFile, AttendanceRecord, Schedule, UserModel, Group
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -106,3 +106,12 @@ class AttendanceRecordSerializer(serializers.ModelSerializer):
             AttendanceFile.objects.create(date=date, file=file_data)
 
         return attendance_record
+
+class ScheduleSerializer(serializers.ModelSerializer):
+    group_name = serializers.CharField(source='group.name', read_only=True)
+    students = UserSerializer(source='group.students', many=True, read_only=True)
+    teachers = UserSerializer(source='group.teachers', many=True, read_only=True)
+
+    class Meta:
+        model = Schedule
+        fields = ['id', 'group', 'group_name', 'title', 'students', 'teachers', 'date', 'description']

@@ -12,6 +12,7 @@ from .views import (
     AddUserToGroupView,
     AggregatedAttendanceView,
     AggregatedAttendanceDownloadView,
+    ScheduleListCreateView
 )
 
 urlpatterns = [ 
@@ -30,6 +31,13 @@ urlpatterns = [
     path('attendance/aggregated/', AggregatedAttendanceView.as_view(), name='aggregated_attendance'),
     path('attendance/', AttendanceRecordListCreateView.as_view(), name='attendance_list_create'),
     path('attendance/attach_file/', AttachFileToAttendanceView.as_view(), name='attach_file_to_attendance'),
+
+    # Расписание
+
+    
+    path('schedule/', ScheduleListCreateView.as_view(), name='schedule_list_create'),
+    
+
 
     # Группы
     path('groups/', GroupListCreateView.as_view(), name='group_list_create'),
