@@ -125,27 +125,185 @@ Defines signal handlers for logging user login events and handling PyPI library 
 
 ### Authentication
 - **Login**: `POST /auth/login/`
+  - **Request Example**:
+    ```json
+    {
+      "username": "user1",
+      "password": "password123"
+    }
+    ```
+  - **Response Example**:
+    ```json
+    {
+      "refresh": "<token>",
+      "access": "<token>"
+    }
+    ```
+
 - **Refresh Token**: `POST /auth/refresh/`
+  - **Request Example**:
+    ```json
+    {
+      "refresh": "<token>"
+    }
+    ```
+  - **Response Example**:
+    ```json
+    {
+      "access": "<token>"
+    }
+    ```
 
 ### Users
 - **List/Create Users**: `GET/POST /data/`
+  - **Request Example (POST)**:
+    ```json
+    {
+      "username": "newuser",
+      "password": "newpassword",
+      "first_name": "John",
+      "last_name": "Doe",
+      "role": "student"
+    }
+    ```
+  - **Response Example (GET)**:
+    ```json
+    [
+      {
+        "id": 1,
+        "username": "user1",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "teacher"
+      }
+    ]
+    ```
+
 - **Update User**: `PUT/PATCH /data/<id>/`
+  - **Request Example (PATCH)**:
+    ```json
+    {
+      "first_name": "Jane"
+    }
+    ```
+  - **Response Example**:
+    ```json
+    {
+      "id": 1,
+      "username": "user1",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "role": "teacher"
+    }
+    ```
 
 ### Attendance
 - **List/Create Attendance**: `GET/POST /attendance/`
+  - **Request Example (POST)**:
+    ```json
+    {
+      "user": 1,
+      "timestamp": "2024-12-16T09:00:00Z"
+    }
+    ```
+  - **Response Example (GET)**:
+    ```json
+    [
+      {
+        "id": 1,
+        "user": 1,
+        "timestamp": "2024-12-16T09:00:00Z"
+      }
+    ]
+    ```
+
 - **Download Aggregated Attendance**: `GET /attendance/aggregated/download/`
+  - No request body required.
+  - File download response.
 
 ### Groups
 - **List/Create Groups**: `GET/POST /groups/`
+  - **Request Example (POST)**:
+    ```json
+    {
+      "name": "Group A"
+    }
+    ```
+  - **Response Example (GET)**:
+    ```json
+    [
+      {
+        "id": 1,
+        "name": "Group A",
+        "teachers": [],
+        "students": []
+      }
+    ]
+    ```
+
 - **Add User to Group**: `POST /groups/<group_id>/add_user/`
+  - **Request Example**:
+    ```json
+    {
+      "user_id": 1,
+      "role": "student"
+    }
+    ```
+  - **Response Example**:
+    ```json
+    {
+      "message": "User added to group."
+    }
+    ```
 
 ### Schedules
 - **List/Create Schedules**: `GET/POST /schedule/`
+  - **Request Example (POST)**:
+    ```json
+    {
+      "group": 1,
+      "title": "Math Class",
+      "date": "2024-12-20"
+    }
+    ```
+  - **Response Example (GET)**:
+    ```json
+    [
+      {
+        "id": 1,
+        "group": 1,
+        "title": "Math Class",
+        "date": "2024-12-20"
+      }
+    ]
+    ```
 
 ### Local PyPI
 - **List Libraries**: `GET /simple/`
+  - **Response Example**:
+    ```json
+    [
+      {
+        "name": "library1",
+        "link": "http://127.0.0.1:8000/simple/library1"
+      }
+    ]
+    ```
+
 - **Library Details**: `GET /simple/<library_name>/`
+  - **Response Example**:
+    ```json
+    {
+      "id": 1,
+      "name": "library1",
+      "description": "A sample library.",
+      "documentation": "http://docs.example.com/library1",
+      "install_command": "pip install http://127.0.0.1:8000/simple/library1/package1.whl --no-deps"
+    }
+    ```
+
 - **Download Package File**: `GET /simple/<library_name>/<filename>/`
+  - **Response**: File download response for the specified library file.
 
 ---
 
@@ -218,4 +376,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ## Contact
 
-For questions or support, contact [your-email@example.com].
+For questions or support, contact [kalimullinbulat26@gmail.ru].
