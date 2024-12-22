@@ -23,12 +23,12 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
 
-        # Проверяем успешную авторизацию
         if response.status_code == 200:
             username = request.data.get('username')
             try:
                 user = UserModel.objects.get(username=username)
-                # Регистрируем посещаемость вручную
+
+                # Логирование посещения
                 AttendanceRecord.objects.create(
                     user=user,
                     timestamp=now(),
@@ -36,13 +36,35 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     user_agent=request.META.get('HTTP_USER_AGENT', 'Unknown'),
                     request_method=request.method,
                     request_url=request.build_absolute_uri(),
-                    headers={k: v for k, v in request.headers.items()},
                 )
                 logger.info(f"Attendance logged for user {user.username}")
+
+                # Добавление данных о пользователе
+                user_serializer = UserSerializer(user)
+                user_data = user_serializer.data
+
+                # Формируем итоговый ответ
+                response_data = {
+                    "user": user_data,
+                    "access": response.data.get("access"),
+                    "refresh": response.data.get("refresh"),
+                    "status": "success",
+                    "error": False
+                }
+                return Response(response_data, status=status.HTTP_200_OK)
+
             except UserModel.DoesNotExist:
                 logger.error(f"User {username} not found for attendance logging")
-        print(response)
-        return response
+                return Response(
+                    {
+                        "error": True,
+                        "status": "failed",
+                        "message": f"User {username} does not exist"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            return response
 
 from rest_framework import generics, mixins
 from rest_framework.permissions import AllowAny
