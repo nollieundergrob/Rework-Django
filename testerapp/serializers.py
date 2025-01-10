@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Test, Question, Answer, Result, Group
+from application.serializers import GroupSerializer
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
