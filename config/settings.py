@@ -69,7 +69,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-    'localpypi.apps.LocalpypiConfig' 
+    'localpypi.apps.LocalpypiConfig' ,
+    'testerapp.apps.TesterappConfig'
 ]
 
 from datetime import timedelta
@@ -93,7 +94,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=3*60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
