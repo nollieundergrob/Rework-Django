@@ -19,12 +19,12 @@ class IsTeacher(IsAuthenticated):
 class TestListCreateView(ListCreateAPIView):
     queryset = Test.objects.all()
     serializer_class = TestSerializer
-
+    permission_classes = [IsAuthenticated]
+    
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return TestCreateSerializer
         return TestSerializer
-
     def perform_create(self, serializer):
         serializer.save(teacher=self.request.user)
 
@@ -32,11 +32,12 @@ class TestDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Test.objects.all()
     serializer_class = TestSerializer
     permission_classes = [IsTeacher]
+    
 
 # CRUD для вопросов
 class QuestionListCreateView(ListCreateAPIView):
     serializer_class = QuestionSerializer
-
+    permission_classes = [IsTeacher]
     def get_queryset(self):
         test_slug = self.kwargs.get('test_slug')
         return Question.objects.filter(test__slug=test_slug)
