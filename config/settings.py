@@ -91,14 +91,37 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
 }
-
-
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=3*60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
+        'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+        'AUTH_HEADER_TYPES': ('Bearer',),
+    }
+if DEBUG:
+    JWT_DEBUG={
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=0.5*60),
+    }
+else:
+    JWT_DEBUG={
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=3*60),
+    }
+ 
+#! If looking for token lifetime settings
 
+SIMPLE_JWT.update(JWT_DEBUG)
+
+
+
+
+
+
+
+
+#* MIDDLEWARE
+
+
+
+DEEP_LOG = False
+WSGI_APPLICATION = 'config.wsgi.application'
+ROOT_URLCONF = 'config.urls'
 
 
 MIDDLEWARE = [
@@ -112,10 +135,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'application.middleware.JWTAuthMiddleware',
-    # 'application.middleware.LogAllRequestsMiddleware',
 ]
 
-ROOT_URLCONF = 'config.urls'
+#! If looking for deep logging
+ 
+if DEEP_LOG:
+    MIDDLEWARE.append('application.middleware.LogAllRequestsMiddleware',)
+
+
 
 TEMPLATES = [
     {
@@ -133,7 +160,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+
 
 
 # Database
