@@ -119,7 +119,9 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+              os.path.join(BASE_DIR, 'application', 'static', 'dist'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -191,9 +193,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'application.UserModel'
 
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'application', 'static', 'dist'),
+]
 
-
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 

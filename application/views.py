@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.views.generic import TemplateView
 from django.utils.timezone import now
 from .models import AttendanceFile, AttendanceRecord, Schedule, UserModel, Group
 from .serializers import AttendanceFileSerializer, AttendanceRecordSerializer, ScheduleSerializer, UserSerializer, GroupSerializer,AddUserToGroupSerializer,AggregatedAttendanceSerializer
@@ -16,6 +17,8 @@ from django.http import HttpResponse
 from io import BytesIO
 
 logger = logging.getLogger('django')
+class ReactAppView(TemplateView):
+    template_name = "index.html"
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     permission_classes = [AllowAny]
