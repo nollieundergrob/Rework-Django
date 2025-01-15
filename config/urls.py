@@ -25,8 +25,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("application.urls")),
     path("simple/", include("localpypi.urls")),
-    # path("", ReactAppView.as_view(), name="home"),
-    re_path(r"^(?!admin/|users/|simple/).*", ReactAppView.as_view(), name="home"),
+    path('test/',include('testerapp.urls')),
+    re_path(r"^(?!admin/|users/|simple/|test/).*", ReactAppView.as_view(), name="home"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -162,17 +162,6 @@ class UserListCreateUpdateView(generics.ListCreateAPIView, mixins.UpdateModelMix
             status=status.HTTP_400_BAD_REQUEST
         )
 
-        
-        # Если данные некорректны, возвращаем ошибку
-        return Response(
-            {
-                "error": True,
-                "status": "failed",
-                "message": serializer.errors
-            },
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
     def put(self, request, *args, **kwargs):
         """Обновление пользователя."""
         return self.update(request, *args, **kwargs)
