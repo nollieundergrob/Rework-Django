@@ -5,7 +5,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.timezone import now
 from .models import AttendanceFile, AttendanceRecord, Schedule, UserModel, Group
-from .serializers import AttendanceFileSerializer, AttendanceRecordSerializer, ScheduleSerializer, UserSerializer, GroupSerializer,AddUserToGroupSerializer,AggregatedAttendanceSerializer
+from .serializers import (
+                          AttendanceFileSerializer, AttendanceRecordSerializer,
+                          ScheduleSerializer,
+                          UserSerializer,
+                          GroupSerializer,
+                          AddUserToGroupSerializer,
+                          AggregatedAttendanceSerializer
+                          )
+
 import logging
 from django.db import models
 from django.utils.timezone import localtime
@@ -14,6 +22,10 @@ from datetime import time
 import pandas as pd
 from django.http import HttpResponse
 from io import BytesIO
+from rest_framework import mixins
+from django.contrib.auth.hashers import make_password
+from rest_framework_simplejwt.tokens import RefreshToken
+import logging
 
 logger = logging.getLogger('django')
 
@@ -66,22 +78,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         else:
             return response
 
-from rest_framework import generics, mixins
-from rest_framework.permissions import AllowAny
-from .models import UserModel
-from .serializers import UserSerializer
 
-from django.contrib.auth.hashers import make_password
-
-from rest_framework import generics, mixins, status
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.utils.timezone import now
-from .models import UserModel, AttendanceRecord
-from .serializers import UserSerializer
-from django.contrib.auth.hashers import make_password
-import logging
 
 logger = logging.getLogger(__name__)
 
