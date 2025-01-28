@@ -26,10 +26,12 @@ SECRET_KEY = 'django-insecure-m0iiv*8=a85wl@+*)1+gmdelke%u3eccsox5gjxhzvuk^b*p8q
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+APPEND_SLASH=False
+
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Если вы работаете на React с localhost
-    "http://127.0.0.1:8000",  # Или ваш тестовый сервер
+    "http://localhost:5173",   
+    "http://127.0.0.1:8000",  
 
 ]
 
@@ -67,6 +69,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'application.apps.ApplicationConfig',
     'corsheaders',
+    'labwork',
+    'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt',
     'localpypi.apps.LocalpypiConfig' ,
@@ -97,7 +101,7 @@ SIMPLE_JWT = {
     }
 if DEBUG:
     JWT_DEBUG={
-        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=0.5*60),
+        'ACCESS_TOKEN_LIFETIME': timedelta(hours=5),
     }
 else:
     JWT_DEBUG={
