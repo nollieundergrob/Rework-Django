@@ -47,8 +47,7 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['id', 'name', 'teachers', 'students']
-
-
+        ref_name = 'ApplicationGroupSerializer' 
 
 class AddUserToGroupSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
